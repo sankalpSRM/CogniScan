@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitive Assessment | Cogni+scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #f6f9fc;
+      font-family: 'Open Sans', Arial, sans-serif;
+      margin: 0;
+      color: #22314a;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      height: 64px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(34,49,74,0.04);
+    }
+    .navbar-logo {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #1877c0;
+      letter-spacing: 1px;
+      margin-right: 2rem;
+    }
+    .navbar-logo span {
+      color: #2ec4b6;
+    }
+    .navbar-links {
+      display: flex;
+      gap: 2rem;
+      font-size: 1.05rem;
+      margin-left: auto;
+    }
+    .navbar-links a {
+      color: #22314a;
+      text-decoration: none;
+      padding-bottom: 4px;
+      border-bottom: 2px solid transparent;
+      transition: border 0.2s;
+    }
+    .navbar-links a.active, .navbar-links a:hover {
+      border-bottom: 2px solid #2ec4b6;
+      color: #1877c0;
+    }
+    .assessment-container {
+      max-width: 480px;
+      margin: 3rem auto 0 auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(34,49,74,0.08);
+      padding: 2.5rem 2rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.7s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .assessment-title {
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: #1877c0;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .assessment-desc {
+      color: #22314a;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: #e3e9f0;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #2ec4b6, #1877c0);
+      width: 0%;
+      transition: width 0.4s;
+    }
+    .question-card {
+      width: 100%;
+      background: #f6f9fc;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(34,49,74,0.06);
+      padding: 1.5rem 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.7s;
+    }
+    .question-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1877c0;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .answers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      width: 100%;
+      align-items: center;
+    }
+    .answer-btn {
+      background: #fff;
+      border: 2px solid #2ec4b6;
+      color: #22314a;
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border 0.2s;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 1px 4px rgba(34,49,74,0.04);
+    }
+    .answer-btn.selected, .answer-btn:hover {
+      background: linear-gradient(90deg, #2ec4b6, #1877c0);
+      color: #fff;
+      border: 2px solid #1877c0;
+    }
+    .next-btn {
+      margin-top: 1.2rem;
+      background: linear-gradient(90deg, #2ec4b6, #1877c0);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 2.2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(34,49,74,0.08);
+      transition: background 0.2s;
+    }
+    .result-section {
+      width: 100%;
+      margin-top: 1.5rem;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.7s;
+    }
+    .result-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1877c0;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .result-content {
+      font-size: 1.1rem;
+      color: #22314a;
+      background: #f6f9fc;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(34,49,74,0.06);
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      .assessment-container {
+        max-width: 98vw;
+        padding: 1.2rem 0.5rem;
+      }
+      .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 0.5rem 0.5rem;
+      }
+      .navbar-links {
+        margin-left: 0;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-content">
+      <div class="logo">Cogni<span class="plus">+</span>scan</div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="about.html">About</a>
+        <a class="nav-link assessment-link active" href="assessment.html">Assessment</a>
+        <a class="nav-link mlp-link" href="mlp_assessment.html">MLP Assessment</a>
+        <a class="nav-link history-link" href="prediction-history.html">History</a>
+        <a class="nav-link" href="resources.html">Resources</a>
+        <button onclick="logout()" class="nav-link logout-btn" style="border: none; background: none; cursor: pointer;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container assessment-container">
+      <!-- Step-by-Step Assessment Section -->
+      <div id="stepAssessment">
+        <h1 class="title">Cognitive Assessment</h1>
+        <p class="subtitle">Answer a few questions to get a quick cognitive profile. Your responses will help us provide actionable insights.</p>
+        
+        <div class="progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="question-card" id="questionCard">
+          <div class="question-title" id="questionTitle"></div>
+          <div class="answers" id="answers"></div>
+          <button class="next-btn" id="nextBtn" style="display:none;">Next</button>
+        </div>
+
+        <div class="result-section" id="resultSection" style="display:none;">
+          <div class="result-title" id="resultTitle">Assessment Result</div>
+          <div class="result-content" id="resultContent">Your cognitive profile will appear here.</div>
+          <button onclick="showMLPAssessment()" class="btn-primary">Continue to Detailed Assessment</button>
+        </div>
+      </div>
+
+      <!-- MLP Assessment Section -->
+      <div id="mlpAssessment" style="display:none;">
+        <h2 class="title">Detailed Cognitive Assessment</h2>
+        <p class="subtitle">Please provide detailed ratings for a comprehensive evaluation.</p>
+
+        <form id="mlpForm" class="assessment-form">
+          <div class="form-group">
+            <label class="form-label" for="behavioralProblems">
+              Rate the severity of behavioral problems (0-10)
+              <div class="form-hint">0 = No problems, 10 = Severe problems</div>
+            </label>
+            <input type="number" id="behavioralProblems" name="behavioralProblems" class="input" min="0" max="10" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="memoryComplaints">
+              Rate the frequency of memory complaints (0-10)
+              <div class="form-hint">0 = Never, 10 = Very frequent</div>
+            </label>
+            <input type="number" id="memoryComplaints" name="memoryComplaints" class="input" min="0" max="10" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="functionalAssessment">
+              Rate the level of functional independence (0-10)
+              <div class="form-hint">0 = Completely dependent, 10 = Fully independent</div>
+            </label>
+            <input type="number" id="functionalAssessment" name="functionalAssessment" class="input" min="0" max="10" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="adl">
+              Rate the ability to perform daily activities (0-10)
+              <div class="form-hint">0 = Unable to perform, 10 = Performs independently</div>
+            </label>
+            <input type="number" id="adl" name="adl" class="input" min="0" max="10" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mmse">
+              Mini-Mental State Examination (MMSE) Score
+              <div class="form-hint">Enter score between 0-30</div>
+            </label>
+            <input type="number" id="mmse" name="mmse" class="input" min="0" max="30" required>
+          </div>
+
+          <button type="submit" class="btn-primary">Submit Assessment</button>
+        </form>
+
+        <div id="mlpResultsSection" class="result-section" style="display: none;">
+          <h2>Detailed Assessment Results</h2>
+          <div id="mlpResultContent"></div>
+          <div id="recommendations"></div>
+          <div class="button-group">
+            <button onclick="window.print()" class="btn-secondary">Print Results</button>
+            <button onclick="startNewAssessment()" class="btn-primary">Start New Assessment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Step-by-Step Assessment Questions
+    const questions = [
+      {
+        q: 'How often do you have trouble remembering recent events?',
+        a: [
+          { text: 'Rarely or never', score: 0 },
+          { text: 'Sometimes', score: 1 },
+          { text: 'Often', score: 2 },
+          { text: 'Almost always', score: 3 }
+        ]
+      },
+      {
+        q: 'How would you rate your ability to focus on tasks?',
+        a: [
+          { text: 'Excellent', score: 0 },
+          { text: 'Good', score: 1 },
+          { text: 'Fair', score: 2 },
+          { text: 'Poor', score: 3 }
+        ]
+      },
+      {
+        q: 'Do you find it difficult to plan or organize activities?',
+        a: [
+          { text: 'No, never', score: 0 },
+          { text: 'Occasionally', score: 1 },
+          { text: 'Frequently', score: 2 },
+          { text: 'Almost always', score: 3 }
+        ]
+      },
+      {
+        q: 'How often do you misplace items (e.g., keys, phone)?',
+        a: [
+          { text: 'Rarely', score: 0 },
+          { text: 'Sometimes', score: 1 },
+          { text: 'Often', score: 2 },
+          { text: 'Very often', score: 3 }
+        ]
+      },
+      {
+        q: 'How would you describe your mood most days?',
+        a: [
+          { text: 'Positive and upbeat', score: 0 },
+          { text: 'Neutral', score: 1 },
+          { text: 'Occasionally low', score: 2 },
+          { text: 'Frequently low', score: 3 }
+        ]
+      }
+    ];
+
+    let current = 0;
+    let scores = [];
+
+    function showQuestion(idx) {
+      const q = questions[idx];
+      document.getElementById('questionTitle').textContent = q.q;
+      const answersDiv = document.getElementById('answers');
+      answersDiv.innerHTML = '';
+      
+      q.a.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = ans.text;
+        btn.onclick = () => selectAnswer(i, ans.score);
+        answersDiv.appendChild(btn);
+      });
+
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('progressBar').style.width = `${(idx / questions.length) * 100}%`;
+    }
+
+    function selectAnswer(idx, score) {
+      document.querySelectorAll('.answer-btn').forEach(btn => btn.classList.remove('selected'));
+      document.querySelectorAll('.answer-btn')[idx].classList.add('selected');
+      document.getElementById('nextBtn').style.display = 'block';
+      scores[current] = score;
+    }
+
+    document.getElementById('nextBtn').onclick = () => {
+      if (current < questions.length - 1) {
+        current++;
+        showQuestion(current);
+      } else {
+        showStepResult();
+      }
+    };
+
+    function showStepResult() {
+      document.getElementById('questionCard').style.display = 'none';
+      document.getElementById('resultSection').style.display = 'block';
+      document.getElementById('progressBar').style.width = '100%';
+      
+      const totalScore = scores.reduce((a, b) => a + b, 0);
+      const maxScore = questions.length * 3;
+      const percentage = (totalScore / maxScore) * 100;
+      
+      let result = 'Normal Cognitive Function';
+      if (percentage > 60) result = 'Significant Cognitive Concerns';
+      else if (percentage > 30) result = 'Mild Cognitive Concerns';
+
+      document.getElementById('resultContent').innerHTML = `
+        <div class="result-card">
+          <h3>${result}</h3>
+          <p>Score: ${totalScore}/${maxScore} (${percentage.toFixed(1)}%)</p>
+          <p>Based on your responses, we recommend proceeding with our detailed assessment for a more comprehensive evaluation.</p>
+        </div>
+      `;
+    }
+
+    function showMLPAssessment() {
+      document.getElementById('stepAssessment').style.display = 'none';
+      document.getElementById('mlpAssessment').style.display = 'block';
+    }
+
+    function startNewAssessment() {
+      current = 0;
+      scores = [];
+      document.getElementById('mlpAssessment').style.display = 'none';
+      document.getElementById('stepAssessment').style.display = 'block';
+      document.getElementById('questionCard').style.display = 'block';
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('mlpResultsSection').style.display = 'none';
+      showQuestion(0);
+    }
+
+    // MLP Form Submission
+    document.getElementById('mlpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        behavioralProblems: parseFloat(document.getElementById('behavioralProblems').value),
+        memoryComplaints: parseFloat(document.getElementById('memoryComplaints').value),
+        functionalAssessment: parseFloat(document.getElementById('functionalAssessment').value),
+        adl: parseFloat(document.getElementById('adl').value),
+        mmse: parseFloat(document.getElementById('mmse').value)
+      };
+
+      try {
+        const response = await fetch('/api/mlp_assess', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          const mlpResultsSection = document.getElementById('mlpResultsSection');
+          const mlpResultContent = document.getElementById('mlpResultContent');
+          const recommendations = document.getElementById('recommendations');
+          
+          mlpResultsSection.style.display = 'block';
+          document.getElementById('mlpForm').style.display = 'none';
+          
+          mlpResultContent.innerHTML = `
+            <div class="result-card">
+              <div class="result-row">
+                <strong>Risk Level:</strong>
+                <span>${result.riskLevel}</span>
+              </div>
+              <div class="result-row">
+                <strong>Confidence:</strong>
+                <span>${(result.confidence * 100).toFixed(1)}%</span>
+              </div>
+              <div class="result-row">
+                <strong>Assessment Date:</strong>
+                <span>${new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+          `;
+
+          recommendations.innerHTML = `
+            <h3>Recommendations</h3>
+            <ul>
+              ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+            </ul>
+          `;
+        } else {
+          alert(result.message || 'Assessment failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Assessment error:', error);
+        alert('An error occurred during assessment. Please try again.');
+      }
+    });
+
+    // Initialize the first question
+    showQuestion(0);
+  </script>
+</body>
+</html> 

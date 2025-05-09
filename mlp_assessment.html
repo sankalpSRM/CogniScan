@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLP Assessment | Cogni+scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .score-info {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.2rem;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1877c0;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 2px 8px rgba(34,49,74,0.08);
+    }
+    .result-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .result-header h3 {
+      color: #1877c0;
+      margin: 0 0 0.5rem 0;
+    }
+    .confidence {
+      background: #e3f2fd;
+      padding: 0.3rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      color: #1877c0;
+    }
+    .recommendations-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+    .recommendations-list li {
+      margin-bottom: 0.5rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    .recommendations-list li:before {
+      content: "•";
+      color: #2ec4b6;
+      position: absolute;
+      left: 0;
+    }
+    .error-message {
+      color: #dc3545;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-content">
+      <div class="logo">Cogni<span class="plus">+</span>scan</div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="about.html">About</a>
+        <a class="nav-link assessment-link" href="assessment.html">Assessment</a>
+        <a class="nav-link active mlp-link" href="mlp_assessment.html">MLP Assessment</a>
+        <a class="nav-link history-link" href="prediction-history.html">History</a>
+        <a class="nav-link" href="resources.html">Resources</a>
+        <button onclick="logout()" class="nav-link logout-btn" style="border: none; background: none; cursor: pointer;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <h1 class="title">MLP Cognitive Assessment</h1>
+      <p class="subtitle">Complete this detailed assessment for a comprehensive cognitive evaluation.</p>
+
+      <form id="mlpForm" class="assessment-form">
+        <div class="form-group">
+          <label class="form-label">
+            Behavioral Problems (0-3)
+            <input class="input" type="number" name="behavioralProblems" min="0" max="3" step="1" required>
+            <div class="form-hint">0 = None, 1 = Mild, 2 = Moderate, 3 = Severe</div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Memory Complaints (0-3)
+            <input class="input" type="number" name="memoryComplaints" min="0" max="3" step="1" required>
+            <div class="form-hint">0 = None, 1 = Occasional, 2 = Frequent, 3 = Constant</div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Functional Assessment (0-3)
+            <input class="input" type="number" name="functionalAssessment" min="0" max="3" step="1" required>
+            <div class="form-hint">0 = Independent, 1 = Needs Some Help, 2 = Needs Much Help, 3 = Dependent</div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Activities of Daily Living (0-3)
+            <input class="input" type="number" name="adl" min="0" max="3" step="1" required>
+            <div class="form-hint">0 = Independent, 1 = Minimal Assistance, 2 = Moderate Assistance, 3 = Maximum Assistance</div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            MMSE Score (0-30)
+            <input class="input" type="number" name="mmse" min="0" max="30" step="1" required>
+            <div class="form-hint">Mini-Mental State Examination score (0-30)</div>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary">Submit Assessment</button>
+      </form>
+      
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Processing your assessment...</p>
+      </div>
+
+      <div id="mlpResult" style="display:none;">
+        <div id="mlpResultContent"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      if (role !== 'patient' && role !== 'doctor') {
+        window.location.href = 'index.html';
+        return;
+      }
+    });
+
+    document.getElementById('mlpForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const loading = document.getElementById('loading');
+      const resultDiv = document.getElementById('mlpResult');
+      const resultContent = document.getElementById('mlpResultContent');
+
+      // Clear previous results
+      resultDiv.style.display = 'none';
+      loading.style.display = 'block';
+
+      try {
+        // Validate input ranges
+        const behavioralProblems = Number(form.behavioralProblems.value);
+        const memoryComplaints = Number(form.memoryComplaints.value);
+        const functionalAssessment = Number(form.functionalAssessment.value);
+        const adl = Number(form.adl.value);
+        const mmse = Number(form.mmse.value);
+
+        // Input validation
+        if (behavioralProblems < 0 || behavioralProblems > 3 ||
+            memoryComplaints < 0 || memoryComplaints > 3 ||
+            functionalAssessment < 0 || functionalAssessment > 3 ||
+            adl < 0 || adl > 3 ||
+            mmse < 0 || mmse > 30) {
+          throw new Error('Please ensure all values are within their specified ranges');
+        }
+
+        const data = {
+          behavioralProblems,
+          memoryComplaints,
+          functionalAssessment,
+          adl,
+          mmse
+        };
+
+        const response = await fetch('/api/mlp_assess', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Assessment failed');
+        }
+
+        const result = await response.json();
+
+        resultContent.innerHTML = `
+          <div class="result-card">
+            <div class="result-header">
+              <h3>${result.result === 'Positive' ? 'High Risk' : 'Low Risk'}</h3>
+              <span class="confidence">Confidence: ${Math.round(result.confidence * 100)}%</span>
+            </div>
+            
+            <div class="recommendations-section">
+              <h4>Recommendations:</h4>
+              <ul class="recommendations-list">
+                ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+              </ul>
+            </div>
+            
+            <div class="assessment-date">
+              Assessment Date: ${new Date().toLocaleDateString()}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        resultContent.innerHTML = `
+          <div class="error-message">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p>${error.message || 'An error occurred while processing your assessment. Please try again.'}</p>
+          </div>
+        `;
+      } finally {
+        loading.style.display = 'none';
+        resultDiv.style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html> 

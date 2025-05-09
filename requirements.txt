@@ -1,0 +1,5 @@
+tensorflow>=2.6.0
+pillow>=8.3.1
+numpy>=1.19.5
+pydicom>=2.2.2
+nibabel>=3.2.1 

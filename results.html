@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results | Cogni+scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-logo">Cogni<span>+</span>scan</div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="assessment.html">Assessment</a>
+      <a href="scan.html">Scan</a>
+      <a href="results.html" class="active">Results</a>
+      <a href="resources.html">Resources</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+  <main>
+    <section class="summary-card">
+      <div class="summary-title">Assessment Summary</div>
+      <div class="summary-item">Overall Cognitive Health: <span class="summary-value">Excellent</span></div>
+      <div class="summary-item">Memory: <span class="summary-subvalue">Normal</span></div>
+      <div class="summary-item">Processing Speed: <span class="summary-subvalue">Normal</span></div>
+      <div class="summary-item">Executive Function: <span class="summary-subvalue">Normal</span></div>
+    </section>
+    <section class="visualization-card">
+      <div class="visualization-title">Results Visualization</div>
+      <canvas id="resultsChart" width="340" height="180" class="chart-canvas"></canvas>
+    </section>
+    <div class="flex-center">
+      <button class="download-button"><i class="bi bi-download"></i> Download Report</button>
+    </div>
+  </main>
+  <script>
+    // Simulated animated bar chart
+    const ctx = document.getElementById('resultsChart').getContext('2d');
+    const data = [90, 85, 88];
+    const labels = ['Memory', 'Processing', 'Executive'];
+    function drawBar(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = '#1877c0';
+      ctx.strokeRect(x, y, w, h);
+    }
+    function animateBars() {
+      ctx.clearRect(0, 0, 340, 180);
+      let max = 100;
+      let barW = 60;
+      let gap = 40;
+      let baseY = 160;
+      let anim = 0;
+      function step() {
+        anim += 4;
+        ctx.clearRect(0, 0, 340, 180);
+        for (let i = 0; i < data.length; i++) {
+          let val = Math.min(anim, data[i]);
+          let h = (val / max) * 120;
+          drawBar(30 + i * (barW + gap), baseY - h, barW, h, i === 0 ? '#2ec4b6' : (i === 1 ? '#1877c0' : '#ff7b54'));
+          ctx.font = 'bold 1rem Montserrat';
+          ctx.fillStyle = '#22314a';
+          ctx.fillText(labels[i], 30 + i * (barW + gap) + 6, baseY + 18);
+          ctx.fillText(val + '%', 30 + i * (barW + gap) + 10, baseY - h - 8);
+        }
+        if (anim < Math.max(...data)) requestAnimationFrame(step);
+      }
+      step();
+    }
+    animateBars();
+    document.querySelector('.download-button').onclick = () => {
+      alert('Download feature coming soon!');
+    };
+  </script>
+</body>
+</html> 

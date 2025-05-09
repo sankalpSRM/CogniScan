@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MRI Scan Analysis - Early Alzheimer's Detection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    nav {
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1rem 2rem;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+
+    nav .logo a {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0f172a;
+      text-decoration: none;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    nav ul li a {
+      color: #64748b;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav ul li a:hover {
+      color: #0f172a;
+    }
+
+    nav ul li a.active {
+      color: #2563eb;
+    }
+
+    main {
+      padding-top: 6rem;
+      min-height: 100vh;
+    }
+
+    .scan-upload-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2.5rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 1rem;
+    }
+
+    .description {
+      color: #64748b;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin: 2rem 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-color: #f8fafc;
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      color: #64748b;
+      margin-bottom: 1rem;
+    }
+
+    .upload-text {
+      font-size: 1.1rem;
+      color: #475569;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      background-color: #2563eb;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .loading-spinner {
+      border: 4px solid #e2e8f0;
+      border-top: 4px solid #2563eb;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    .analysis-results {
+      display: none;
+      margin-top: 2rem;
+      padding: 2rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background-color: #f8fafc;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .result-icon {
+      font-size: 2rem;
+      color: #2563eb;
+    }
+
+    .confidence-meter {
+      margin: 1.5rem 0;
+      background-color: #e2e8f0;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .confidence-bar {
+      height: 100%;
+      background-color: #2563eb;
+      transition: width 0.8s ease;
+    }
+
+    .findings-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .findings-list li {
+      padding: 1rem;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .findings-list li i {
+      color: #2563eb;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      display: none;
+      background-color: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <a href="/">Early Alzheimer's Detection</a>
+    </div>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/assessment">Assessment</a></li>
+      <li><a href="/scan" class="active">Scan Analysis</a></li>
+      <li><a href="/resources">Resources</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="scan-upload-container">
+      <h1>MRI Scan Analysis</h1>
+      <p class="description">Upload your MRI scan for automated analysis. We accept DICOM (.dcm), NIfTI (.nii, .nii.gz), and common image formats (JPEG, PNG, TIFF).</p>
+      
+      <div class="upload-area" id="dropZone">
+        <i class="bi bi-cloud-upload upload-icon"></i>
+        <p class="upload-text">Drag and drop your scan file here</p>
+        <p class="upload-text">or</p>
+        <button class="btn" onclick="document.getElementById('fileInput').click()">
+          <i class="bi bi-file-earmark-medical"></i> Choose File
+        </button>
+        <input type="file" id="fileInput" class="file-input" accept=".dcm,.nii,.nii.gz,.jpg,.jpeg,.png,.tiff,.tif">
+      </div>
+
+      <div class="error-message" id="errorMessage">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span id="errorText"></span>
+      </div>
+
+      <div class="loading" id="loadingIndicator">
+        <div class="loading-spinner"></div>
+        <p>Analyzing scan...</p>
+      </div>
+
+      <div class="analysis-results" id="analysisResults">
+        <div class="result-header">
+          <i class="bi bi-clipboard2-pulse result-icon"></i>
+          <div>
+            <h2>Analysis Results</h2>
+            <p>Diagnosis: <strong><span id="diagnosis"></span></strong></p>
+          </div>
+        </div>
+        
+        <div class="confidence-meter">
+          <div class="confidence-bar" id="confidenceBar"></div>
+        </div>
+        <p>Confidence: <strong><span id="confidence"></span>%</strong></p>
+        
+        <h3 style="margin-top: 2rem;">Key Findings:</h3>
+        <ul class="findings-list" id="findingsList"></ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const analysisResults = document.getElementById('analysisResults');
+    const diagnosisElement = document.getElementById('diagnosis');
+    const confidenceBar = document.getElementById('confidenceBar');
+    const confidenceElement = document.getElementById('confidence');
+    const findingsList = document.getElementById('findingsList');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    dropZone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', handleFiles, false);
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function highlight(e) {
+      dropZone.classList.add('dragover');
+    }
+
+    function unhighlight(e) {
+      dropZone.classList.remove('dragover');
+    }
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles({ target: { files: files } });
+    }
+
+    function showError(message) {
+      errorText.textContent = message;
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    function handleFiles(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      errorMessage.style.display = 'none';
+      
+      const validTypes = ['.dcm', '.nii', '.nii.gz', '.jpg', '.jpeg', '.png', '.tiff', '.tif'];
+      const fileExtension = file.name.toLowerCase().match(/\.[^.]*$/);
+      if (!fileExtension || !validTypes.includes(fileExtension[0])) {
+        showError('Please upload a valid medical image file (DICOM, NIfTI, JPEG, PNG, or TIFF)');
+        return;
+      }
+
+      if (file.size > 50 * 1024 * 1024) {
+        showError('File size must be less than 50MB');
+        return;
+      }
+
+      uploadFile(file);
+    }
+
+    function uploadFile(file) {
+      const formData = new FormData();
+      formData.append('scan', file);
+
+      loadingIndicator.style.display = 'block';
+      analysisResults.style.display = 'none';
+      errorMessage.style.display = 'none';
+
+      fetch('/api/analyze-scan', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        displayResults(data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showError('An error occurred while analyzing the scan. Please try again.');
+      })
+      .finally(() => {
+        loadingIndicator.style.display = 'none';
+      });
+    }
+
+    function displayResults(data) {
+      diagnosisElement.textContent = data.diagnosis;
+      
+      const confidencePercentage = Math.round(data.confidence * 100);
+      confidenceBar.style.width = `${confidencePercentage}%`;
+      confidenceElement.textContent = confidencePercentage;
+
+      findingsList.innerHTML = '';
+      data.findings.forEach(finding => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <i class="bi bi-check-circle"></i>
+          <span>${finding}</span>
+        `;
+        findingsList.appendChild(li);
+      });
+
+      analysisResults.style.display = 'block';
+    }
+  </script>
+</body>
+</html> 

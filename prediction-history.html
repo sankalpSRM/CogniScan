@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction History - Cogniscan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <div class="logo">Cogni<span class="plus">+</span>scan</div>
+            <div class="nav-links">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="about.html">About</a>
+                <a class="nav-link" href="assessment.html">Assessment</a>
+                <a class="nav-link active" href="prediction-history.html">History</a>
+                <a class="nav-link" href="resources.html">Resources</a>
+                <button onclick="logout()" class="nav-link" style="border: none; background: none; cursor: pointer;">Logout</button>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <section class="container">
+            <h1 class="title">Prediction History</h1>
+            <div class="history-filters">
+                <div class="form-group">
+                    <label for="dateRange" class="form-label">Date Range</label>
+                    <select id="dateRange" class="input">
+                        <option value="7">Last 7 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="all">All time</option>
+                    </select>
+                </div>
+                <div id="patientFilter" class="form-group" style="display: none;">
+                    <label for="patient" class="form-label">Patient</label>
+                    <select id="patient" class="input">
+                        <option value="all">All Patients</option>
+                    </select>
+                </div>
+            </div>
+            <div id="historyList" class="history-list">
+                <!-- Predictions will be loaded here -->
+            </div>
+        </section>
+    </main>
+    <script>
+        // Check user role and show/hide patient filter
+        const userRole = localStorage.getItem('role');
+        const patientFilter = document.getElementById('patientFilter');
+        if (userRole === 'doctor') {
+            patientFilter.style.display = 'block';
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            window.location.href = '/login.html';
+        }
+
+        // Load prediction history
+        async function loadPredictionHistory() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/prediction-history', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const historyList = document.getElementById('historyList');
+                    historyList.innerHTML = ''; // Clear existing content
+                    
+                    if (data.predictions.length === 0) {
+                        historyList.innerHTML = '<p class="text-center">No predictions found.</p>';
+                        return;
+                    }
+                    
+                    data.predictions.forEach(prediction => {
+                        const predictionCard = document.createElement('div');
+                        predictionCard.className = 'card mb-2';
+                        predictionCard.innerHTML = `
+                            <div class="prediction-header">
+                                <h3>${prediction.patientName}</h3>
+                                <span class="prediction-date">${new Date(prediction.date).toLocaleDateString()}</span>
+                            </div>
+                            <div class="prediction-details">
+                                <p><strong>Diagnosis:</strong> ${prediction.diagnosis}</p>
+                                <p><strong>Confidence:</strong> ${(prediction.confidence * 100).toFixed(1)}%</p>
+                                <p><strong>Method:</strong> ${prediction.method}</p>
+                            </div>
+                        `;
+                        historyList.appendChild(predictionCard);
+                    });
+                } else {
+                    throw new Error('Failed to load prediction history');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('historyList').innerHTML = 
+                    '<p class="text-center text-error">Error loading prediction history. Please try again later.</p>';
+            }
+        }
+
+        // Load history when page loads
+        document.addEventListener('DOMContentLoaded', loadPredictionHistory);
+
+        // Update history when filters change
+        document.getElementById('dateRange').addEventListener('change', loadPredictionHistory);
+        document.getElementById('patient').addEventListener('change', loadPredictionHistory);
+    </script>
+</body>
+</html> 
